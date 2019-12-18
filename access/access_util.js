@@ -3,7 +3,10 @@ const path = require('path');
 const access_log_path = path.resolve(__dirname, 'access_log.json');
 if (!fs.pathExistsSync(access_log_path)) {
 	fs.ensureFileSync(access_log_path);
-	fs.writeJSONSync(access_log_path, {})
+	fs.writeJSONSync(access_log_path, {
+		access_num: 0,
+		access_log: []
+	});
 }
 function readLog() {
 	return fs.readJson(access_log_path);
