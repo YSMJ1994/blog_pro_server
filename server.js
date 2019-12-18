@@ -6,7 +6,7 @@ const send = require('koa-send');
 const koaBody = require('koa-body');
 const fs = require('fs-extra');
 const path = require('path');
-const access_util = require('./access_util');
+const access_util = require('./access/access_util');
 
 const app = new Koa();
 
