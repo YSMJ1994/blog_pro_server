@@ -57,12 +57,18 @@ staticServer.use(async (ctx, next) => {
 app.use(mount('/blog', staticServer));
 
 // Restful路由接口
-const router = new Router();
-router.get('/blog_server/blog_access', async ctx => {
+const router = new Router({
+	prefix: '/blog_server'
+});
+router.get('/blog_access', async ctx => {
 	// console.log('ctx', )
 	const { ip, ips } = ctx;
+	let realIp = ip;
+	if(ips.length) {
+		realIp = ips[0]
+	}
 	const time = +new Date();
-	ctx.body = await access_util.newAccess(ip, time);
-});
+	ctx.body = await access_util.newAccess(realIp, time);
+}).get('/total_access');
 app.use(router.routes()).use(router.allowedMethods());
 app.listen(8500, '0.0.0.0');
