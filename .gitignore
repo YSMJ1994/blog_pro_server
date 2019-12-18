@@ -1,0 +1,8 @@
+.idea
+.vscode
+.DS_Store
+*.log
+*.temp
+node_modules
+blog
+access/access_log.json
