@@ -8,8 +8,9 @@ const fs = require('fs-extra');
 const path = require('path');
 const access_util = require('./access/access_util');
 
-const app = new Koa();
-
+const app = new Koa({
+	proxy: true
+});
 function resolvePath(relativePath) {
 	return path.resolve(process.cwd(), relativePath);
 }
@@ -17,7 +18,7 @@ function resolvePath(relativePath) {
 // log
 app.use(async (ctx, next) => {
 	const { origin, host, url } = ctx;
-	console.log('request url', url);
+	// console.log('request url', url);
 	await next();
 });
 
@@ -61,11 +62,10 @@ const router = new Router({
 	prefix: '/blog_server'
 });
 router.get('/blog_access', async ctx => {
-	// console.log('ctx', )
 	const { ip, ips } = ctx;
 	let realIp = ip;
 	if(ips.length) {
-		realIp = ips[ips.length - 1]
+		realIp = ips[0]
 	}
 	const time = +new Date();
 	ctx.body = await access_util.newAccess(realIp, time);
