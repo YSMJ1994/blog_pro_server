@@ -6,6 +6,7 @@ const send = require('koa-send');
 const koaBody = require('koa-body');
 const fs = require('fs-extra');
 const path = require('path');
+const moment = require('moment');
 const access_util = require('./access/access_util');
 
 const app = new Koa({
@@ -62,13 +63,14 @@ const router = new Router({
 	prefix: '/blog_server'
 });
 router.get('/blog_access', async ctx => {
-	const { ip, ips } = ctx;
-	let realIp = ip;
-	if(ips.length) {
-		realIp = ips[0]
+	ctx.body = await access_util.newAccess();
+}).get('/blog_info', async ctx => {
+	const {access_num, release_time} = await access_util.getAccessInfo();
+	const time = +moment();
+	ctx.body = {
+		access_num,
+		runtime: time - release_time
 	}
-	const time = +new Date();
-	ctx.body = await access_util.newAccess(realIp, time);
-}).get('/total_access');
+});
 app.use(router.routes()).use(router.allowedMethods());
 app.listen(8500, '0.0.0.0');
