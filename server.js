@@ -65,7 +65,7 @@ router.get('/blog_access', async ctx => {
 	const { ip, ips } = ctx;
 	let realIp = ip;
 	if(ips.length) {
-		realIp = ips[0]
+		realIp = ips[ips.length - 1]
 	}
 	const time = +new Date();
 	ctx.body = await access_util.newAccess(realIp, time);
