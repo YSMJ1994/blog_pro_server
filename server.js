@@ -1,3 +1,7 @@
+process.on('unhandledRejection', err => {
+	throw err;
+});
+require('./src/utils/env');
 const Koa = require('koa');
 const Router = require('koa-router');
 const mount = require('koa-mount');
@@ -7,7 +11,7 @@ const koaBody = require('koa-body');
 const fs = require('fs-extra');
 const path = require('path');
 const moment = require('moment');
-const access_util = require('./access/access_util');
+const { queryBlogInfo, updateBlogInfo } = require('./src/dao/blog_info');
 
 const app = new Koa({
 	proxy: true
@@ -62,15 +66,20 @@ app.use(mount('/blog', staticServer));
 const router = new Router({
 	prefix: '/blog_server'
 });
-router.get('/blog_access', async ctx => {
-	ctx.body = await access_util.newAccess();
-}).get('/blog_info', async ctx => {
-	const {access_num, release_time} = await access_util.getAccessInfo();
-	const time = +moment();
-	ctx.body = {
-		access_num,
-		runtime: time - release_time
-	}
-});
+router
+	.get('/blog_access', async ctx => {
+		const { access_num } = await queryBlogInfo();
+		const new_num = +access_num + 1;
+		await updateBlogInfo({ access_num: new_num });
+		ctx.body = new_num;
+	})
+	.get('/blog_info', async ctx => {
+		const { access_num, release_time } = await queryBlogInfo();
+		const time = +moment();
+		ctx.body = {
+			access_num: +access_num,
+			runtime: time - +release_time
+		};
+	});
 app.use(router.routes()).use(router.allowedMethods());
 app.listen(8500, '0.0.0.0');
