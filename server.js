@@ -3,15 +3,11 @@ process.on('unhandledRejection', err => {
 });
 require('./src/utils/env');
 const Koa = require('koa');
-const Router = require('koa-router');
 const mount = require('koa-mount');
 const staticServe = require('koa-static');
 const send = require('koa-send');
-const koaBody = require('koa-body');
-const fs = require('fs-extra');
 const path = require('path');
-const moment = require('moment');
-const { queryBlogInfo, updateBlogInfo } = require('./src/dao/blog_info');
+const router = require('./src/controller');
 
 const app = new Koa({
 	proxy: true
@@ -22,16 +18,16 @@ function resolvePath(relativePath) {
 
 // log
 app.use(async (ctx, next) => {
-	const { origin, host, url } = ctx;
+	// const { origin, host, url } = ctx;
 	// console.log('request url', url);
 	await next();
 });
 
 // cros
 app.use(async (ctx, next) => {
-	const { origin, host, url, method } = ctx;
+	// const { origin, host, url, method } = ctx;
 	ctx.set({
-		'Access-Control-Allow-Origin': '*',
+		'Access-Control-Allow-Origin': 'soberz.cn',
 		'Access-Control-Request-Method': 'PUT,POST,GET,DELETE,OPTIONS',
 		'Access-Control-Expose-Headers': '*',
 		'Access-Control-Allow-Headers': '*'
@@ -61,25 +57,5 @@ staticServer.use(async (ctx, next) => {
 });
 
 app.use(mount('/blog', staticServer));
-
-// Restful路由接口
-const router = new Router({
-	prefix: '/blog_server'
-});
-router
-	.get('/blog_access', async ctx => {
-		const { access_num } = await queryBlogInfo();
-		const new_num = +access_num + 1;
-		await updateBlogInfo({ access_num: new_num });
-		ctx.body = new_num;
-	})
-	.get('/blog_info', async ctx => {
-		const { access_num, release_time } = await queryBlogInfo();
-		const time = +moment();
-		ctx.body = {
-			access_num: +access_num,
-			runtime: time - +release_time
-		};
-	});
 app.use(router.routes()).use(router.allowedMethods());
 app.listen(8500, '0.0.0.0');
