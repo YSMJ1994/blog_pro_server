@@ -38,8 +38,15 @@ app.use(async (ctx, next) => {
 // 静态资源代理blog目录
 const staticServer = new Koa();
 const staticDir = resolvePath('blog');
+const indexPath = resolvePath('blog/index.html');
 staticServer.use(staticServe(staticDir, {
-	maxage: 1000 * 60 * 60 * 24 * 7
+	maxage: 1000 * 60 * 60 * 24 * 7,
+	setHeaders: (res, path, stats) => {
+		if(path === indexPath) {
+			// index.html不使用缓存
+			res.setHeader('Cache-Control', 'max-age=0')
+		}
+	}
 }));
 // 未知路径均返回index.html
 staticServer.use(async (ctx, next) => {
