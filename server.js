@@ -38,7 +38,9 @@ app.use(async (ctx, next) => {
 // 静态资源代理blog目录
 const staticServer = new Koa();
 const staticDir = resolvePath('blog');
-staticServer.use(staticServe(staticDir));
+staticServer.use(staticServe(staticDir, {
+	maxage: 1000 * 60 * 60 * 24 * 7
+}));
 // 未知路径均返回index.html
 staticServer.use(async (ctx, next) => {
 	let done = false;
